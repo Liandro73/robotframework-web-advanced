@@ -3,47 +3,72 @@ Library    SeleniumLibrary
 Library    String
 
 *** Variables ***
-${BROWSER}      chrome
-${URL}          http://automationpractice.com
+${BROWSER}                           chrome
+${URL}                               https://saucedemo.com/
+${TIMEOUT}                           15
+#LoginPage
+${INPUT_USERNAME}                    id=user-name
+${INPUT_PASSWORD}                    id=password
+#ProductPage
+${PRODUCT}                           xpath=//div[text()="Sauce Labs Bolt T-Shirt"]
+
 
 *** Keywords ***
 #### Setup e Teardown
-Abrir navegador
-    Open Browser        about:blank   ${BROWSER}
+Setup
+    Set Selenium Timeout             ${TIMEOUT}
+    Open Browser                     about:blank   ${BROWSER}
 
-Fechar navegador
+Tear Down
     Close Browser
 
-#### Ações
-Acessar a página home do site
-    Go To               ${URL}
-    Wait Until Element Is Visible    xpath=//*[@id="block_top_menu"]/ul
-    Title Should Be     My Store
+#### Actions
+Go to homepage Sauce Demo - Store
+    Go To                            ${URL}
+    Wait Until Element Is Visible    class=login_logo
+    Title Should Be                  Swag Labs
 
-Digitar o nome do produto "${PRODUTO}" no campo de pesquisa
-    Input Text          name=search_query    ${PRODUTO}
+Login with user "${USER}" and password "${PASSWORD}"
+    Capture Page Screenshot
+    Clear Element Text               ${INPUT_USERNAME}
+    Input Text                       ${INPUT_USERNAME}    ${USER}
 
-Clicar no botão pesquisar
-    Click Element       name=submit_search
+    Clear Element Text               ${INPUT_PASSWORD}
+    Input Text                       ${INPUT_PASSWORD}    ${PASSWORD}
 
-Clicar no botão "Add to Cart" do produto
-    Wait Until Element Is Visible   xpath=//*[@id="center_column"]//img[@alt="Faded Short Sleeve T-shirts"]
-    Click Element                   xpath=//*[@id="center_column"]//img[@alt="Faded Short Sleeve T-shirts"]
-    Wait Until Element Is Visible   xpath=//*[@id="add_to_cart"]/button
-    Click Button                    xpath=//*[@id="add_to_cart"]/button
+    Click Button                     id=login-button
+
+Click on product "T-shirt"
+    Wait Until Element Is Visible    class=app_logo
+    Wait Until Element Is Visible    ${PRODUCT}
+    Click Element                    ${PRODUCT}
+
+Click on button "Add to Cart"
+    Wait Until Element Is Visible    id=add-to-cart-sauce-labs-bolt-t-shirt
+    Click Button                     id=add-to-cart-sauce-labs-bolt-t-shirt
 
 Clicar no botão "Proceed to checkout"
-    Wait Until Element Is Visible   xpath=//*[@id="layer_cart"]//a[@title="Proceed to checkout"]
-    Click Element                   xpath=//*[@id="layer_cart"]//a[@title="Proceed to checkout"]
+    Wait Until Element Is Visible    xpath=//*[@id="layer_cart"]//a[@title="Proceed to checkout"]
+    Click Element                    xpath=//*[@id="layer_cart"]//a[@title="Proceed to checkout"]
 
-Adicionar o produto "${PRODUTO}" no carrinho
-    Digitar o nome do produto "${PRODUTO}" no campo de pesquisa
-    Clicar no botão pesquisar
-    Clicar no botão "Add to Cart" do produto
-    Clicar no botão "Proceed to checkout"
+Add the product "t-shirt" in the cart
+    Click on product "T-shirt"
+    Click on button "Add to Cart"
 
-Excluir o produto do carrinho
-    Click Element    xpath=//*[@class="cart_quantity_delete"]
+Verify that there are the product "${PRODUCT_NAME}" in the cart
+    Wait Until Element Is Visible    class=shopping_cart_badge
+    Element Text Should Be           class=shopping_cart_badge    1
+    Click Element                    class=shopping_cart_link
+    Wait Until Element Is Visible    xpath=//span[text()="Your Cart"]
+    Capture Page Screenshot
+    Element Text Should Be           ${PRODUCT}    ${PRODUCT_NAME}
+
+Remove the product from the cart
+    Click Button                     id=remove-sauce-labs-bolt-t-shirt
+    
+The cart should be empty
+    Element Should Not Be Visible    class=shopping_cart_badge
+    Capture Page Screenshot
 
 Clicar em "Sign in"
     Click Element    xpath=//*[@id="header"]//*[@class="login"][contains(text(),"Sign in")]
