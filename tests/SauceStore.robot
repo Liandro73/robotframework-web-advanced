@@ -1,14 +1,16 @@
 *** Settings ***
 Resource            ../resources/Resource.robot
-Test Setup          Abrir navegador
-Test Teardown       Fechar navegador
+Test Setup          Setup
+Test Teardown       Tear Down
 
 *** Test Case ***
-Caso de Teste com PO 01: Remover Produtos do Carrinho
-    Acessar a página home do site
-    Adicionar o produto "t-shirt" no carrinho
-    Excluir o produto do carrinho
-    Conferir se o carrinho fica vazio
+Test Case 01 with Page Object: remove cart's products
+    Go to homepage Sauce Demo - Store
+    Login with user "standard_user" and password "secret_sauce"
+    Add the product "t-shirt" in the cart
+    Verify that there are the product "Sauce Labs Bolt T-Shirt" in the cart
+    Remove the product from the cart
+    The cart should be empty
 
 ### EXERCÍCIO
 # Caso de Teste com PO 02: Adicionar Cliente
