@@ -1,6 +1,7 @@
 *** Settings ***
 Library    SeleniumLibrary
 Library    String
+Library    FakerLibrary
 
 *** Variables ***
 ${BROWSER}                           chrome
@@ -11,6 +12,10 @@ ${INPUT_USERNAME}                    id=user-name
 ${INPUT_PASSWORD}                    id=password
 #ProductPage
 ${PRODUCT}                           xpath=//div[text()="Sauce Labs Bolt T-Shirt"]
+#CheckoutPage
+${INPUT_FIRSTNAME}                   id=first-name
+${INPUT_LASTNAME}                    id=last-name
+${INPUT_ZIPCODE}                     id=postal-code
 
 
 *** Keywords ***
@@ -70,43 +75,33 @@ The cart should be empty
     Element Should Not Be Visible    class=shopping_cart_badge
     Capture Page Screenshot
 
-Clicar em "Sign in"
-    Click Element    xpath=//*[@id="header"]//*[@class="login"][contains(text(),"Sign in")]
+Go to checkout
+    Click Button                     id=checkout 
 
-Informar um e-mail válido
-    Wait Until Element Is Visible   id=email_create
-    ${EMAIL}                        Generate Random String
-    Input Text                      id=email_create    ${EMAIL}@testerobot.com
+Fill the checkout information and continue
+    Wait Until Element Is Visible    xpath=//span[text()="Checkout: Your Information"]
 
-Clicar em "Create an account"
-    Click Button    id=SubmitCreate
+    ${FIRSTNAME}                     First Name
+    ${LASTNAME}                      Last Name
+    ${ZIPCODE}                       Zipcode
 
-Preencher os dados obrigatórios
-    Wait Until Element Is Visible   xpath=//*[@id="account-creation_form"]//h3[contains(text(),"Your personal information")]
-    Click Element                   id=id_gender2
-    Input Text                      id=customer_firstname    May
-    Input Text                      id=customer_lastname     Fernandes
-    Input Text                      id=passwd                123456
-    Input Text                      id=address1              Rua Framework, Bairro Robot
-    Input Text                      id=city                  Floripa
-    Set Focus To Element            id=id_state
-    ### No firefox ocorreu problema ao achar o listbox State, então coloquei um if para esperar
-    ### pelo elemento quando for firefox
-    Run Keyword If    '${BROWSER}'=='firefox'  Wait Until Element Is Visible   id=id_state
-    Select From List By Index       id=id_state              9
-    Input Text                      id=postcode              12345
-    Input Text                      id=phone_mobile          99988877
+    Clear Element Text               ${INPUT_FIRSTNAME}
+    Input Text                       ${INPUT_FIRSTNAME}    ${FIRSTNAME}
 
-Submeter cadastro
-    Click Button    submitAccount
+    Clear Element Text               ${INPUT_LASTNAME}
+    Input Text                       ${INPUT_LASTNAME}     ${LASTNAME}
 
-#### Conferências
-Conferir se o cadastro foi efetuado com sucesso
-    Wait Until Element Is Visible    xpath=//*[@id="center_column"]/p
-    Element Text Should Be           xpath=//*[@id="center_column"]/p
-    ...    Welcome to your account. Here you can manage all of your personal information and orders.
-    Element Text Should Be           xpath=//*[@id="header"]/div[2]//div[1]/a/span    May Fernandes
+    Clear Element Text               ${INPUT_ZIPCODE}
+    Input Text                       ${INPUT_ZIPCODE}      ${ZIPCODE}
+    Capture Page Screenshot
 
-Conferir se o carrinho fica vazio
-    Wait Until Element Is Visible   xpath=//*[@id="center_column"]/p[@class='alert alert-warning']
-    Element Text Should Be          xpath=//*[@id="center_column"]/p[@class='alert alert-warning']    Your shopping cart is empty.
+    Click Button                     id=continue
+
+Finish the order
+    Wait Until Element Is Visible    xpath=//span[text()="Checkout: Overview"]
+    Click Button                     id=finish
+
+The order should be completed and this message should be visible "${MESSAGE}"
+    Wait Until Element Is Visible    xpath=//span[text()="Checkout: Complete!"]
+    Element Should Be Visible        xpath=//h2[text()="${MESSAGE}"]
+    Capture Page Screenshot
